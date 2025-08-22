@@ -1,4 +1,8 @@
 package com.noticeboard.testproject.demo.repository;
 
-public interface BoardRepository {
+import com.noticeboard.testproject.demo.entity.BoardEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
+
 }
