@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시판 목록</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .board-container {
+      margin: 2rem auto;
+      max-width: 1200px;
+    }
+    .board-title {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+    .table {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .table th {
+      border: none;
+      font-weight: 600;
+      text-align: center;
+      padding: 1rem;
+    }
+    .table td {
+      vertical-align: middle;
+      padding: 1rem;
+      border-color: #e9ecef;
+    }
+    .title-link {
+      color: #2c3e50;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .title-link:hover {
+      color: #667eea;
+      text-decoration: underline;
+    }
+    .badge-hits {
+      background: linear-gradient(45deg, #ff6b6b, #ffa500);
+      border: none;
+    }
+    .text-muted-custom {
+      color: #6c757d !important;
+      font-size: 0.9rem;
+    }
+    .btn-new {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 25px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-1px);
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid board-container">
+  <!-- 헤더 섹션 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="board-title">
+      <i class="fas fa-clipboard-list me-2"></i>
+      게시판 목록
+    </h1>
+    <button class="btn btn-primary btn-new" onclick="location.href='/board/save'">
+      <i class="fas fa-plus me-1"></i>
+      새 글 작성
+    </button>
+  </div>
+
+  <!-- 게시글 목록 테이블 -->
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th style="width: 8%">
+          <i class="fas fa-hashtag me-1"></i>번호
+        </th>
+        <th style="width: 40%">
+          <i class="fas fa-file-alt me-1"></i>제목
+        </th>
+        <th style="width: 15%">
+          <i class="fas fa-user me-1"></i>작성자
+        </th>
+        <th style="width: 20%">
+          <i class="fas fa-calendar me-1"></i>작성일
+        </th>
+        <th style="width: 10%">
+          <i class="fas fa-eye me-1"></i>조회수
+        </th>
+        <th style="width: 7%">관리</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 게시글이 있는 경우 -->
+      <tr th:each="board, stat : ${boardList}" th:if="${not #lists.isEmpty(boardList)}">
+        <td class="text-center fw-bold text-primary" th:text="${stat.count}"></td>
+
+        <td>
+          <a th:href="@{/board/{id}(id=${board.id})}"
+             class="title-link"
+             th:text="${board.boardTitle}"></a>
+        </td>
+
+        <td class="text-center">
+          <i class="fas fa-user-circle me-1 text-muted"></i>
+          <span th:text="${board.boardWriter}"></span>
+        </td>
+
+        <td class="text-center text-muted-custom">
+          <i class="far fa-clock me-1"></i>
+          <span th:text="${#temporals.format(board.boardCreatedTime, 'yyyy.MM.dd HH:mm')}"></span>
+        </td>
+
+        <td class="text-center">
+          <span class="badge badge-hits rounded-pill" th:text="${board.boardHits}"></span>
+        </td>
+
+        <td class="text-center">
+          <div class="btn-group" role="group">
+            <a th:href="@{/board/update/{id}(id=${board.id})}"
+               class="btn btn-outline-primary btn-sm"
+               title="수정">
+              <i class="fas fa-edit"></i>
+            </a>
+            <button class="btn btn-outline-danger btn-sm"
+                    th:onclick="|deleteBoard(${board.id})|"
+                    title="삭제">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      <!-- 게시글이 없는 경우 -->
+      <tr th:if="${#lists.isEmpty(boardList)}">
+        <td colspan="6" class="empty-state">
+          <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+          <h5>등록된 게시글이 없습니다</h5>
+          <p class="text-muted">첫 번째 게시글을 작성해보세요!</p>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 페이징 (추후 추가 가능) -->
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <!-- 페이징 버튼들 -->
+    </ul>
+  </nav>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // 게시글 삭제 함수
+  function deleteBoard(boardId) {
+    if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+      fetch(`/board/delete/${boardId}`, {
+        method: 'DELETE'
+      }).then(response => {
+        if (response.ok) {
+          alert('게시글이 삭제되었습니다.');
+          location.reload();
+        } else {
+          alert('삭제에 실패했습니다.');
+        }
+      });
+    }
+  }
+
+  // 테이블 행 클릭 이벤트 (선택사항)
+  document.querySelectorAll('tbody tr').forEach(row => {
+    row.addEventListener('click', function(e) {
+      // 버튼 클릭이 아닌 경우에만 상세페이지로 이동
+      if (!e.target.closest('.btn-group')) {
+        const link = this.querySelector('.title-link');
+        if (link) {
+          window.location.href = link.href;
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
