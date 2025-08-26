@@ -24,6 +24,7 @@ public class BoardDTO {
     private LocalDateTime boardCreatedTime;
     private LocalDateTime boardUpdatedTime;
 
+
     public static BoardDTO toBoardDTO(BoardEntity boardEntity) {
         BoardDTO boardDTO = new BoardDTO();
         boardDTO.setId(boardEntity.getId());
