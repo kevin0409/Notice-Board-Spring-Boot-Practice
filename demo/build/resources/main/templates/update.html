@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'게시글 수정 - ' + ${boardUpdate.boardTitle}">게시글 수정</title>
+
+  <!-- CSS 라이브러리 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --warning-color: #ffc107;
+      --text-dark: #2c3e50;
+      --text-muted: #6c757d;
+      --border-color: #e9ecef;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+
+    .update-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* 헤더 스타일 */
+    .update-header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .update-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+    }
+
+    .update-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .update-header p {
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 폼 스타일 */
+    .update-form {
+      padding: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .form-label i {
+      margin-right: 0.5rem;
+      width: 16px;
+      color: var(--primary-color);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .form-control:read-only {
+      background-color: #f8f9fa;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .form-control.is-valid {
+      border-color: var(--success-color);
+    }
+
+    .form-control.is-invalid {
+      border-color: var(--danger-color);
+    }
+
+    .form-textarea {
+      min-height: 200px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .readonly-info {
+      background: #e3f2fd;
+      border: 1px solid #bbdefb;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .readonly-info h6 {
+      color: #1565c0;
+      margin: 0 0 0.5rem 0;
+      font-weight: 600;
+    }
+
+    .readonly-info p {
+      margin: 0;
+      color: #1976d2;
+      font-size: 0.9rem;
+    }
+
+    /* 버튼 스타일 */
+    .btn-group-custom {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .btn-custom {
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    /* 패스워드 검증 스타일 */
+    .password-validation {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .validation-message {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 5px;
+      font-size: 0.85rem;
+    }
+
+    .validation-message.success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .validation-message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    /* 문자 카운터 */
+    .char-counter {
+      text-align: right;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .char-counter.warning {
+      color: var(--warning-color);
+    }
+
+    .char-counter.danger {
+      color: var(--danger-color);
+    }
+
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .update-container {
+        margin: 0 1rem;
+        border-radius: 15px;
+      }
+
+      .btn-group-custom {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn-custom {
+        width: 100%;
+        max-width: 200px;
+        justify-content: center;
+      }
+    }
+
+    /* 로딩 애니메이션 */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 툴팁 스타일 */
+    .tooltip-icon {
+      color: var(--text-muted);
+      cursor: help;
+      margin-left: 0.5rem;
+    }
+
+    .tooltip-icon:hover {
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+<div class="update-container">
+  <!-- 헤더 섹션 -->
+  <div class="update-header">
+    <h1>
+      <i class="fas fa-edit me-2"></i>
+      게시글 수정
+    </h1>
+    <p>게시글 정보를 수정하세요</p>
+  </div>
+
+  <!-- 폼 섹션 -->
+  <div class="update-form">
+    <!-- 읽기 전용 정보 -->
+    <div class="readonly-info">
+      <h6><i class="fas fa-info-circle me-1"></i>게시글 정보</h6>
+      <p>게시글 번호: <strong th:text="${boardUpdate.id}">1</strong> |
+        조회수: <strong th:text="${boardUpdate.boardHits}">0</strong>회</p>
+    </div>
+
+    <form action="/board/update" method="post" name="updateForm" id="updateForm" novalidate>
+      <!-- 숨겨진 필드들 -->
+      <input type="hidden" name="id" th:value="${boardUpdate.id}">
+      <input type="hidden" name="boardHits" th:value="${boardUpdate.boardHits}">
+
+      <!-- 작성자 (읽기 전용) -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-user"></i>
+          작성자
+        </label>
+        <input type="text"
+               name="boardWriter"
+               class="form-control"
+               th:value="${boardUpdate.boardWriter}"
+               readonly>
+        <small class="text-muted">작성자는 수정할 수 없습니다.</small>
+      </div>
+
+      <!-- 비밀번호 -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-lock"></i>
+          비밀번호 확인
+          <i class="fas fa-question-circle tooltip-icon"
+             title="게시글 작성 시 입력한 비밀번호를 입력하세요"></i>
+        </label>
+        <input type="password"
+               name="boardPass"
+               id="boardPass"
+               class="form-control"
+               placeholder="게시글 비밀번호를 입력하세요"
+               maxlength="20"
+               required>
+        <div id="passwordValidation" class="validation-message"></div>
+      </div>
+
+      <!-- 제목 -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-heading"></i>
+          제목
+        </label>
+        <input type="text"
+               name="boardTitle"
+               id="boardTitle"
+               class="form-control"
+               th:value="${boardUpdate.boardTitle}"
+               placeholder="게시글 제목을 입력하세요"
+               maxlength="100"
+               required>
+        <div class="char-counter">
+          <span id="titleCounter">0</span>/100
+        </div>
+      </div>
+
+      <!-- 내용 -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-file-alt"></i>
+          내용
+        </label>
+        <textarea name="boardContents"
+                  id="boardContents"
+                  class="form-control form-textarea"
+                  placeholder="게시글 내용을 입력하세요"
+                  maxlength="1000"
+                  required
+                  th:text="${boardUpdate.boardContents}"></textarea>
+        <div class="char-counter">
+          <span id="contentCounter">0</span>/1000
+        </div>
+      </div>
+
+      <!-- 버튼 그룹 -->
+      <div class="btn-group-custom">
+        <button type="button"
+                id="updateBtn"
+                class="btn-custom btn-primary"
+                onclick="boardUpdate()">
+          <i class="fas fa-save"></i>
+          수정 완료
+        </button>
+
+        <button type="button"
+                class="btn-custom btn-secondary"
+                onclick="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          돌아가기
+        </button>
+
+        <button type="button"
+                class="btn-custom btn-danger"
+                onclick="resetForm()">
+          <i class="fas fa-undo"></i>
+          초기화
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+  // 전역 변수
+  const originalPass = [[${boardUpdate.boardPass}]];
+  const boardId = [[${boardUpdate.id}]];
+  const originalTitle = [[${boardUpdate.boardTitle}]];
+  const originalContent = [[${boardUpdate.boardContents}]];
+
+  // DOM 요소들
+  const passInput = document.getElementById('boardPass');
+  const titleInput = document.getElementById('boardTitle');
+  const contentInput = document.getElementById('boardContents');
+  const updateBtn = document.getElementById('updateBtn');
+  const passwordValidation = document.getElementById('passwordValidation');
+  const titleCounter = document.getElementById('titleCounter');
+  const contentCounter = document.getElementById('contentCounter');
+
+  // 게시글 수정 함수
+  const boardUpdate = () => {
+    const inputPass = passInput.value.trim();
+
+    // 유효성 검사
+    if (!validateForm()) {
+      return;
+    }
+
+    // 비밀번호 확인
+    if (originalPass !== inputPass) {
+      showValidationMessage('비밀번호가 일치하지 않습니다!', 'error');
+      passInput.focus();
+      passInput.classList.add('is-invalid');
+      return;
+    }
+
+    // 변경사항 확인
+    if (!hasChanges()) {
+      if (!confirm('변경된 내용이 없습니다. 그래도 수정하시겠습니까?')) {
+        return;
+      }
+    }
+
+    // 최종 확인
+    if (confirm('게시글을 수정하시겠습니까?')) {
+      // 버튼 비활성화 및 로딩 표시
+      updateBtn.disabled = true;
+      updateBtn.innerHTML = '<div class="loading"></div> 수정 중...';
+
+      // 폼 제출
+      document.updateForm.submit();
+    }
+  };
+
+  // 폼 유효성 검사
+  const validateForm = () => {
+    let isValid = true;
+
+    // 비밀번호 검사
+    if (!passInput.value.trim()) {
+      showValidationMessage('비밀번호를 입력해주세요.', 'error');
+      passInput.classList.add('is-invalid');
+      isValid = false;
+    }
+
+    // 제목 검사
+    if (!titleInput.value.trim()) {
+      titleInput.classList.add('is-invalid');
+      showToast('제목을 입력해주세요.', 'error');
+      isValid = false;
+    } else {
+      titleInput.classList.remove('is-invalid');
+      titleInput.classList.add('is-valid');
+    }
+
+    // 내용 검사
+    if (!contentInput.value.trim()) {
+      contentInput.classList.add('is-invalid');
+      showToast('내용을 입력해주세요.', 'error');
+      isValid = false;
+    } else {
+      contentInput.classList.remove('is-invalid');
+      contentInput.classList.add('is-valid');
+    }
+
+    return isValid;
+  };
+
+  // 변경사항 확인
+  const hasChanges = () => {
+    return titleInput.value.trim() !== originalTitle ||
+        contentInput.value.trim() !== originalContent;
+  };
+
+  // 유효성 메시지 표시
+  const showValidationMessage = (message, type) => {
+    passwordValidation.textContent = message;
+    passwordValidation.className = `validation-message ${type}`;
+
+    if (type === 'error') {
+      setTimeout(() => {
+        passwordValidation.style.display = 'none';
+      }, 3000);
+    }
+  };
+
+  // 토스트 메시지
+  const showToast = (message, type = 'info') => {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : 'success'} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
+            `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  };
+
+  // 문자 카운터 업데이트
+  const updateCounter = (input, counter, maxLength) => {
+    const currentLength = input.value.length;
+    counter.textContent = currentLength;
+
+    // 색상 변경
+    counter.parentElement.className = 'char-counter';
+    if (currentLength > maxLength * 0.9) {
+      counter.parentElement.classList.add('danger');
+    } else if (currentLength > maxLength * 0.7) {
+      counter.parentElement.classList.add('warning');
+    }
+  };
+
+  // 돌아가기
+  const goBack = () => {
+    if (hasChanges()) {
+      if (confirm('수정 중인 내용이 있습니다. 정말 돌아가시겠습니까?')) {
+        history.back();
+      }
+    } else {
+      history.back();
+    }
+  };
+
+  // 폼 초기화
+  const resetForm = () => {
+    if (confirm('모든 입력 내용을 초기화하시겠습니까?')) {
+      titleInput.value = originalTitle;
+      contentInput.value = originalContent;
+      passInput.value = '';
+
+      // 유효성 클래스 제거
+      document.querySelectorAll('.form-control').forEach(el => {
+        el.classList.remove('is-valid', 'is-invalid');
+      });
+
+      // 카운터 업데이트
+      updateCounter(titleInput, titleCounter, 100);
+      updateCounter(contentInput, contentCounter, 1000);
+
+      passwordValidation.style.display = 'none';
+      showToast('입력 내용이 초기화되었습니다.', 'success');
+    }
+  };
+
+  // 이벤트 리스너
+  document.addEventListener('DOMContentLoaded', function() {
+    // 초기 카운터 설정
+    updateCounter(titleInput, titleCounter, 100);
+    updateCounter(contentInput, contentCounter, 1000);
+
+    // 비밀번호 입력 이벤트
+    passInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        passwordValidation.style.display = 'none';
+      }
+    });
+
+    // 제목 입력 이벤트
+    titleInput.addEventListener('input', function() {
+      updateCounter(this, titleCounter, 100);
+      if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+      }
+    });
+
+    // 내용 입력 이벤트
+    contentInput.addEventListener('input', function() {
+      updateCounter(this, contentCounter, 1000);
+      if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+      }
+    });
+
+    // 엔터키 이벤트 (제목 필드에서)
+    titleInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        contentInput.focus();
+      }
+    });
+
+    // Ctrl+S로 저장
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        boardUpdate();
+      }
+    });
+
+    // 페이지 떠날 때 확인
+    window.addEventListener('beforeunload', function(e) {
+      if (hasChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    console.log('게시글 수정 페이지 로드 완료');
+  });
+</script>
+</body>
+</html>

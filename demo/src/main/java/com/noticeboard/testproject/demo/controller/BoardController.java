@@ -45,4 +45,18 @@ public class BoardController {
         return "detail";
     }
 
+    @GetMapping("/update/{id}")
+    public String updateForm(@PathVariable("id") Long id, Model model) {
+        BoardDTO boardDto = boardService.findById(id);
+        model.addAttribute("boardUpdate", boardDto);
+        return "update";
+    }
+
+    @PostMapping("/update")
+    public String update(@ModelAttribute BoardDTO boardDTO, Model model) {
+        BoardDTO board = boardService.update(boardDTO);
+        model.addAttribute("board", board);
+        return "detail";
+        //return "redirect:/board/";
+    }
 }
